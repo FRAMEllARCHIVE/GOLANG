@@ -1,0 +1,130 @@
+
+CERTBOT WARNING:
+REMEMBER TO CREATE NGINX CONFIG AND BUILD SERVER ON 8888 PORT BEFORE UPDATING TO HTTPS USING CERTBOT
+
+---
+
+
+
+sudo apt update
+sudo apt install certbot
+sudo certbot certonly --nginx -d frame-archive.online
+
+sudo apt-get install python3-certbot-nginx
+
+
+---
+
+
+sudo cat <<END_GO | sudo tee /etc/nginx/sites-available/goserver
+server {
+    listen 8888;
+    server_name 34.91.99.244;
+
+    location / {
+        root /home/ponderingfishl;
+        index index.html;
+    }
+
+    location /i {
+        root /home/ponderingfishl;
+        index frame.html;
+    }
+
+    location = /OpenCV.js {
+        root /home/ponderingfishl;
+    }
+
+    location /ARCHIVE {
+        proxy_pass http://127.0.0.1:7777;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_buffering off;
+        proxy_read_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_connect_timeout 10s;
+        proxy_set_header Content-Type "application/x-www-form-urlencoded";
+        proxy_set_header Content-Length \$content_length;
+        proxy_pass_request_body on;
+    }
+
+    location /FRAME {
+        proxy_pass http://127.0.0.1:7777;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_buffering off;
+        proxy_read_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_connect_timeout 10s;
+        proxy_set_header Content-Type "application/x-www-form-urlencoded";
+        proxy_set_header Content-Length \$content_length;
+        proxy_pass_request_body on;
+    }
+
+    location /COLLECTION {
+        proxy_pass http://127.0.0.1:7777;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_buffering off;
+        proxy_read_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_connect_timeout 10s;
+        proxy_set_header Content-Type "application/x-www-form-urlencoded";
+        proxy_set_header Content-Length \$content_length;
+        proxy_pass_request_body on;
+    }
+
+    location /NEW_CLIENT {
+        proxy_pass http://127.0.0.1:7777;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_buffering off;
+        proxy_read_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_connect_timeout 10s;
+        proxy_set_header Content-Type "application/x-www-form-urlencoded";
+        proxy_set_header Content-Length \$content_length;
+        proxy_pass_request_body on;
+    }
+
+    location /COLLECTED {
+        proxy_pass http://127.0.0.1:7777;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_buffering off;
+        proxy_read_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_connect_timeout 10s;
+        proxy_set_header Content-Type "application/x-www-form-urlencoded";
+        proxy_set_header Content-Length \$content_length;
+        proxy_pass_request_body on;
+    }
+
+    location /snapscan_webhook {
+        proxy_pass http://127.0.0.1:7777;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_buffering off;
+        proxy_read_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_connect_timeout 10s;
+        proxy_set_header Content-Type "application/x-www-form-urlencoded";
+        proxy_set_header Content-Length \$content_length;
+        proxy_pass_request_body on;
+    }
+}
+END_GO
+
+---

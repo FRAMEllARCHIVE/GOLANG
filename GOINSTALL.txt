@@ -1,0 +1,197 @@
+sudo apt update -y
+wget https://go.dev/dl/go1.21.0.linux-amd64.tar.gz
+sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.21.0.linux-amd64.tar.gz
+export PATH=$PATH:/usr/local/go/bin
+source ~/.bashrc
+sudo apt install gcc -y
+sudo apt update -y
+
+sudo cat <<END_GO | sudo tee /etc/systemd/system/goserver.service
+[Unit]
+Description=Go Server Service
+After=network.target
+
+[Service]
+ExecStart=/home/ponderingfishl/goserver
+WorkingDirectory=/home/ponderingfishl
+User=ponderingfishl
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+END_GO
+
+nano goserver.go
+
+
+
+---
+
+
+go mod init server
+go mod tidy
+CGO_ENABLED=1 go build goserver.go
+sudo apt install nginx -y
+
+
+---
+
+
+sudo cat <<END_GO | sudo tee /etc/nginx/sites-available/goserver
+server {
+    listen 443 ssl;
+    server_name frame-archive.online;
+
+    ssl_certificate /etc/letsencrypt/live/frame-archive.online/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/frame-archive.online/privkey.pem;
+
+    location / {
+        root /home/ponderingfishl;
+        index index.html;
+    }
+
+    location /l {
+        alias /home/ponderingfishl;
+        try_files /1.html =404;
+    }
+
+    location /ll {
+        alias /home/ponderingfishl;
+        try_files /2.html =404;
+    }
+
+    location /lll {
+        alias /home/ponderingfishl;
+        try_files /3.html =404;
+    }
+
+    location /llll {
+        alias /home/ponderingfishl;
+        try_files /4.html =404;
+    }
+
+    location /ARCHIVE {
+        proxy_pass http://127.0.0.1:7777;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_buffering off;
+        proxy_read_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_connect_timeout 10s;
+        proxy_set_header Content-Type "application/x-www-form-urlencoded";
+        proxy_set_header Content-Length \$content_length;
+        proxy_pass_request_body on;
+    }
+
+    location /FRAME {
+        proxy_pass http://127.0.0.1:7777;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_buffering off;
+        proxy_read_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_connect_timeout 10s;
+        proxy_set_header Content-Type "application/x-www-form-urlencoded";
+        proxy_set_header Content-Length \$content_length;
+        proxy_pass_request_body on;
+    }
+
+    location /COLLECTION {
+        proxy_pass http://127.0.0.1:7777;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_buffering off;
+        proxy_read_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_connect_timeout 10s;
+        proxy_set_header Content-Type "application/x-www-form-urlencoded";
+        proxy_set_header Content-Length \$content_length;
+        proxy_pass_request_body on;
+    }
+
+    location /NEW_CLIENT {
+        proxy_pass http://127.0.0.1:7777;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_buffering off;
+        proxy_read_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_connect_timeout 10s;
+        proxy_set_header Content-Type "application/x-www-form-urlencoded";
+        proxy_set_header Content-Length \$content_length;
+        proxy_pass_request_body on;
+    }
+
+    location /COLLECTED {
+        proxy_pass http://127.0.0.1:7777;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_buffering off;
+        proxy_read_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_connect_timeout 10s;
+        proxy_set_header Content-Type "application/x-www-form-urlencoded";
+        proxy_set_header Content-Length \$content_length;
+        proxy_pass_request_body on;
+    }
+
+    location /snapscan_webhook {
+        proxy_pass http://127.0.0.1:7777;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_buffering off;
+        proxy_read_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_connect_timeout 10s;
+        proxy_set_header Content-Type "application/x-www-form-urlencoded";
+        proxy_set_header Content-Length \$content_length;
+        proxy_pass_request_body on;
+    }
+}
+END_GO
+
+---
+
+
+sudo ln -s /etc/nginx/sites-available/goserver /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl restart nginx
+sudo systemctl daemon-reload
+sudo systemctl enable nginx
+sudo systemctl enable goserver
+sudo systemctl start goserver
+
+
+CONSOLE:
+sudo journalctl -u goserver -f
+
+STOP SERVICE:
+sudo systemctl stop goserver
+sudo systemctl disable goserver
+sudo reboot
+
+SUDO RM:
+sudo rm goserver.go goserver token.db archive.db go.mod
+sudo rm goserver.go goserver token.db archive.db go.mod index.html frame.html
+sudo rm goserver.go goserver token.db archive.db go.mod index.html CVARCHIVE11.html CVFRAME.html scanner.html exp.html
+sudo rm goserver.go goserver go.mod index.html frame.html
+
+du -h archive.db
+
+sudo rm /etc/nginx/sites-enabled/goserver
+
+sudo tail -n 20 /var/log/nginx/error.log
+error_log /var/log/nginx/error.log debug;
+
